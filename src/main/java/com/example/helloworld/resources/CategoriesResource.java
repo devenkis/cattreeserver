@@ -79,7 +79,10 @@ public class CategoriesResource {
 		int status = 200;
 		boolean retValue = true;
 		try {
-			if(categoriesDAO.updateNode(category)<=0) {
+			if(category.getId() == DAOHandler.CATEGORYTREE_ROOTID) {
+				status = 406; //not acceptable
+				retValue = false;
+			} else if(categoriesDAO.updateNode(category)<=0) {
 				status = 400; //bad request
 				retValue = false;
 			}
