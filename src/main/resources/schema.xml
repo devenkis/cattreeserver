@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<tables>
+	<inmemory>
+		<dbobject id="1" name="default" type="table">
+			create table categories
+				(
+				id   integer primary key autoincrement,
+                name text not null,
+                displayname text,
+                description text,
+                parentid integer,
+                siblingnumber real,
+                FOREIGN KEY (parentid) REFERENCES categories(id) ON DELETE CASCADE
+				);
+		</dbobject>
+		<dbobject id="2" name="adjacencylist" type="table">
+			create table categories_al
+				(
+				id   integer primary key autoincrement,
+                name text not null,
+                displayname text,
+                description text,
+                parentid integer,
+                FOREIGN KEY (parentid) REFERENCES categories(id) ON DELETE CASCADE
+				);
+  		
+		</dbobject>
+		<dbobject id="3" name="nestedset" type="table">
+		</dbobject>
+		<dbobject id="4" name="nestedinterval" type="table">
+		</dbobject>
+		<dbobject id="5" name="bridgetable" type="table">
+		</dbobject>
+		<dbobject id="6" name="flattable" type="table">
+		</dbobject>
+		<dbobject id="7" name="lineagecolumns" type="table">
+		</dbobject>
+		<dbobject id="8" name="multiplelineagecolumns" type="table">
+		</dbobject>
+	</inmemory>
+	<initialData>
+		<category name="Electronics" displayName="Electronics" description="All Electronic goods">
+			<category name="Mobiles" displayName="Mobiles" description="All Mobile electronic goods"/>
+			<category name="Phones" displayName="Phones" description="Mobile Phones">
+				<category name="Accessories" displayName="Accessorices" description="All Mobile Phone accessories">
+						<category name="Chargers" displayName="Chargers" description="Chargers for mobiles"/>
+						<category name="Cases and Covers" displayName="Cases and Covers" description="Cases and Covers for mobiles"/>
+						<category name="Screen Protectors" displayName="Screen Protectors" description="Screen Protectors for mobiles"/>
+						<category name="Power Banks" displayName="Power Banks" description="Power Banks for mobiles"/>
+						<category name="Selfie Sticks" displayName="Selfie Sticks" description="Selfie Sticks for mobiles"/>
+				</category>
+			</category>
+			<category name="Cameras" displayName="Cameras" description="All types of Cameras"/>
+			<category name="Computers" displayName="Computers" description="All Computers">
+				<category name="Business laptops" displayName="Business laptops" description="All Business laptops"/>
+				<category name="Gaming laptops" displayName="Gaming laptops" description="All types of Gaming laptops"/>
+				<category name="Desktops" displayName="Desktops" description="All types of Desktops electronic goods"/>
+			</category>
+		</category>
+		<category name="Books" displayName="Books" description="All Books"/>
+		<category name="Fashion" displayName="Fashion" description="All Fashion goods"/>
+		<category name="Home and Furniture" displayName="Home and Furniture" description="All Home and Furnishing goods"/>
+		<category name="Appliances" displayName="Appliances" description="All Applicances"/>
+	</initialData>
+</tables>
