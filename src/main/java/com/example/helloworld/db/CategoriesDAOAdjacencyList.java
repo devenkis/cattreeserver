@@ -23,16 +23,17 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 	// Static Constants
 	public static final String DB_TABLENAME = "categories";
 	private static final String CATEGORIES_INSERT = "INSERT INTO " + DB_TABLENAME
-			+ " (name, displayname, description, parentid, siblingnumber )" + "VALUES (?, ?, ?, ?, ?)";
+			+ " (name, catname, description, parentid, siblingnumber )" + "VALUES (?, ?, ?, ?, ?)";
 	private static final String CATEGORIES_UPDATE = "UPDATE " + DB_TABLENAME
-			+ " set name = ?, displayname = ?, description = ?, parentid = ?, siblingnumber = ? " + " where id  = ?";
+			+ " set name = ?, catname = ?, description = ?, parentid = ?, siblingnumber = ? " + " where id  = ?";
 	private static final String CATEGORIES_DELETE = "DELETE FROM " + DB_TABLENAME + " where id  = ?";
-	private static final String CATEGORIES_SELECT = " SELECT id, name, displayname, description, parentid, siblingnumber FROM "
+	private static final String CATEGORIES_DELETE_CHILDREN = "DELETE FROM " + DB_TABLENAME + " where parentid  = ?";
+	private static final String CATEGORIES_SELECT = " SELECT id, name, catname, description, parentid, siblingnumber FROM "
 			+ DB_TABLENAME;
 	private static final String CATEGORIES_SELECT_FILTER = " where id = ?";
 	private static final String CATEGORIES_SELECT_SUB_FILTER = " where parentid = ?";
 	private static final String CATEGORIES_SELECT_IDEMPOTENCY = " SELECT count(*) FROM " + DB_TABLENAME
-			+ " where parentid = ? and displayname = ?";
+			+ " where parentid = ? and name = ?";
 	private static final String CATEGORIES_SELECT_NOOFCHILDREN = " SELECT count(*) FROM " + DB_TABLENAME
 			+ " where parentid = ?";
 	private static final String CATEGORIES_ORDERBY_SIBLINGNUMBER = " ORDER BY siblingnumber ";
@@ -43,6 +44,7 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 	private SQLStatement mCategoriesInsert = null;
 	private SQLStatement mCategoriesUpdate = null;
 	private SQLStatement mCategoriesDelete = null;
+	private SQLStatement mCategoriesDeleteChildren = null;
 	private PreparedStatement mCategoriesSelectAll = null;
 	private PreparedStatement mCategoriesSelect = null;
 	private PreparedStatement mSubCategoriesSelect = null;
@@ -59,7 +61,7 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 	public int createNode(Category category) throws SQLException {
 		int returnValue = 0;
 		mCategoriesInsert.setNString(1, toString(category.getName()));
-		mCategoriesInsert.setNString(2, toString(category.getDisplayName()));
+		mCategoriesInsert.setNString(2, toString(category.getCatName()));
 		mCategoriesInsert.setNString(3, toString(category.getDescription()));
 		if (category.getParentId() < 0) // for root node insertion
 			mCategoriesInsert.setNull(4, Types.INTEGER);
@@ -75,10 +77,10 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 	}
 
 	@Override
-	public int checkCategoryBeforeInsertionIdempotency(int parentId, String displayName) throws SQLException {
+	public int checkCategoryBeforeInsertionIdempotency(int parentId, String name) throws SQLException {
 		int returnCount = 0;
 		connectionPool.getCoreInvoker().setInt(mCategorySelectForIdempotency, 1, parentId);
-		connectionPool.getCoreInvoker().setNString(mCategorySelectForIdempotency, 2, displayName);
+		connectionPool.getCoreInvoker().setNString(mCategorySelectForIdempotency, 2, name);
 		try {
 			ResultSet rs = mCategorySelectForIdempotency.executeQuery();
 			while (rs.next()) {
@@ -106,7 +108,7 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 				Category category = new Category();
 				category.setId(rs.getInt("id"));
 				category.setName(rs.getString("name"));
-				category.setDisplayName(rs.getString("displayname"));
+				category.setCatName(rs.getString("catname"));
 				category.setDescription(rs.getString("description"));
 				category.setParentId(rs.getInt("parentid"));
 				category.setSiblingNumber(rs.getFloat("siblingnumber"));
@@ -130,7 +132,7 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 				Category category = new Category();
 				category.setId(rs.getInt("id"));
 				category.setName(rs.getString("name"));
-				category.setDisplayName(rs.getString("displayname"));
+				category.setCatName(rs.getString("catname"));
 				category.setDescription(rs.getString("description"));
 				category.setParentId(rs.getInt("parentid"));
 				category.setSiblingNumber(rs.getFloat("siblingnumber"));
@@ -179,7 +181,7 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 	public int updateNode(Category category) throws SQLException {
 		int returnValue = 0;
 		mCategoriesUpdate.setNString(1, toString(category.getName()));
-		mCategoriesUpdate.setNString(2, toString(category.getDisplayName()));
+		mCategoriesUpdate.setNString(2, toString(category.getCatName()));
 		mCategoriesUpdate.setNString(3, toString(category.getDescription()));
 		mCategoriesUpdate.setInt(4, category.getParentId());
 		// add as the latest sibling if the position is not specified
@@ -209,11 +211,25 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 		return returnValue;
 	}
 
+
+	@Override
+	public int deleteAllChildren(int id) throws SQLException {
+		int returnValue = 0;
+		mCategoriesDeleteChildren.setInt(1, id);
+		try {
+			returnValue = mCategoriesDeleteChildren.executeUpdate();
+		} catch (SQLException e) {
+			handleSQLException(e);
+		}
+		return returnValue;
+	}
+	
 	@Override
 	public void close() throws SQLException {
 		mCategoriesInsert.close();
 		mCategoriesUpdate.close();
 		mCategoriesDelete.close();
+		mCategoriesDeleteChildren.close();
 		mCategoriesSelectAll.close();
 		mCategoriesSelect.close();
 		mSubCategoriesSelect.close();
@@ -245,6 +261,7 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 		mCategoriesInsert = new SQLStatement(connection, CATEGORIES_INSERT, this.connectionPool.getCoreInvoker());
 		mCategoriesUpdate = new SQLStatement(connection, CATEGORIES_UPDATE, this.connectionPool.getCoreInvoker());
 		mCategoriesDelete = new SQLStatement(connection, CATEGORIES_DELETE, this.connectionPool.getCoreInvoker());
+		mCategoriesDeleteChildren = new SQLStatement(connection, CATEGORIES_DELETE_CHILDREN, this.connectionPool.getCoreInvoker());
 		mCategoriesSelectAll = connection.prepareStatement(CATEGORIES_SELECT + CATEGORIES_ORDERBY_SIBLINGNUMBER);
 		mCategoriesSelect = connection
 				.prepareStatement(CATEGORIES_SELECT + CATEGORIES_SELECT_FILTER + CATEGORIES_ORDERBY_SIBLINGNUMBER);
@@ -279,5 +296,4 @@ public class CategoriesDAOAdjacencyList implements TreeDAO {
 	protected String toString(String value) {
 		return value == null || value.length() == 0 ? null : value;
 	}
-
 }

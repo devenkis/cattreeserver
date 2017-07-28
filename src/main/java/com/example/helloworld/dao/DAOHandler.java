@@ -46,8 +46,8 @@ public class DAOHandler {
 	}
 	
 	public boolean resetAndReload() throws Exception {
-		mCategoriesTableHandler.deleteNode(CATEGORYTREE_ROOTID);
-		loadInitialData();
+		mCategoriesTableHandler.deleteAllChildren(CATEGORYTREE_ROOTID);
+		loadInitialData(true);
 		return true;
 	}
 	
@@ -63,7 +63,7 @@ public class DAOHandler {
 		}
 		setAllTableManagers();
 		try {
-			loadInitialData();
+			loadInitialData(false);
 		} catch (Exception e) {
 			System.out.println("Inital Data load exception: " + e);
 		}
@@ -123,14 +123,16 @@ public class DAOHandler {
 
 	}
 
-	private void loadInitialData() throws Exception {
-		CATEGORYTREE_ROOTID = mCategoriesTableHandler.createNode(new Category(0, "root", "root", "rootshouldneverbedeleted", -100, 1));
+	private void loadInitialData(boolean avoidRoot) throws Exception {
+		if(avoidRoot==false){
+			CATEGORYTREE_ROOTID = mCategoriesTableHandler.createNode(new Category(0, "root", "root", "rootshouldneverbedeleted", -100, 1));
+		}
 		int electronicGoodsId = mCategoriesTableHandler.createNode(new Category(0, "Electronics", "Electronics", "All Electronic goods", CATEGORYTREE_ROOTID, 1));
 			mCategoriesTableHandler.createNode(new Category(0, "Mobiles", "Mobiles", "All Mobiles Electronic goods", electronicGoodsId, 1));
 			int phoneId = mCategoriesTableHandler.createNode(new Category(0, "Phones", "Phones", "Mobiles Phones", electronicGoodsId, 2));
 				int accessoriesID = mCategoriesTableHandler.createNode(new Category(0, "Accessories", "Accessories", "All Mobile Phone accessories", phoneId, 1));
 					mCategoriesTableHandler.createNode(new Category(0, "Chargers", "Chargers", "Chargers for mobiles", accessoriesID, 1));
-					mCategoriesTableHandler.createNode(new Category(0, "Cases and Covers", "Cases & Covers", "Cases and Covers for mobiles", accessoriesID, 2));
+					mCategoriesTableHandler.createNode(new Category(0, "Cases & Covers", "Cases and Covers", "Cases and Covers for mobiles", accessoriesID, 2));
 					mCategoriesTableHandler.createNode(new Category(0, "Screen Protectors", "Screen Protectors", "Screen Protectors for mobiles", accessoriesID, 3));
 					mCategoriesTableHandler.createNode(new Category(0, "Power Banks", "Power Banks", "Power Banks for mobiles", accessoriesID, 4));
 					mCategoriesTableHandler.createNode(new Category(0, "Selfie Sticks", "Selfie Sticks", "Selfie Sticks for mobiles", accessoriesID, 5));
@@ -141,7 +143,7 @@ public class DAOHandler {
 				mCategoriesTableHandler.createNode(new Category(0, "Desktops", "Desktops", "All types of Desktops electronic goods", computersID, 3));
 			mCategoriesTableHandler.createNode(new Category(0, "Books", "Books", "All Bookss", CATEGORYTREE_ROOTID, 2));
 			mCategoriesTableHandler.createNode(new Category(0, "Fashion", "Fashion", "All Fashion goods", CATEGORYTREE_ROOTID, 3));
-			mCategoriesTableHandler.createNode(new Category(0, "Home and Furniture", "Home & Furniture", "All Home and Furniture goods", CATEGORYTREE_ROOTID, 4));
+			mCategoriesTableHandler.createNode(new Category(0, "Home & Furniture", "Home and Furniture", "All Home and Furniture goods", CATEGORYTREE_ROOTID, 4));
 			mCategoriesTableHandler.createNode(new Category(0, "Appliances", "Appliances", "All Appliances", CATEGORYTREE_ROOTID, 5));
 	}
 

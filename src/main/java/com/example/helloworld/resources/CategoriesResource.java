@@ -1,9 +1,6 @@
 package com.example.helloworld.resources;
 
-import java.sql.SQLException;
 import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -12,16 +9,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import com.example.helloworld.core.Category;
 import com.example.helloworld.core.UpdatePositionBean;
 import com.example.helloworld.dao.DAOHandler;
 import com.example.helloworld.dao.TreeDAO;
-import com.example.helloworld.db.CategoriesDAOAdjacencyList;
 
 
 
@@ -37,14 +30,12 @@ public class CategoriesResource {
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response createCategory(Category category, @Context HttpHeaders header, @Context HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		response.setHeader("Access-Control-Allow-Credentials","true"); 
+	public Response createCategory(Category category) {
 		Response retResponse;
 		int status = 200;
 		Category returnValue = null;
 		try {
-			int count = categoriesDAO.checkCategoryBeforeInsertionIdempotency(category.getParentId(), category.getDisplayName());
+			int count = categoriesDAO.checkCategoryBeforeInsertionIdempotency(category.getParentId(), category.getName());
 			if(count == 0) {
 				returnValue = category;
 				int siblingCount = categoriesDAO.getSiblingCount(category.getParentId());
@@ -67,15 +58,12 @@ public class CategoriesResource {
 	@Path("position")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateCategoryPosition(UpdatePositionBean updatePositionBeanObject, @Context HttpHeaders header, @Context HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		response.setHeader("Access-Control-Allow-Credentials","true"); 
+	public Response updateCategoryPosition(UpdatePositionBean updatePositionBeanObject) {
 		int status = 200;
-		
 		try {
 			int updated = categoriesDAO.updatePosition(updatePositionBeanObject);
 			System.out.println("updated position: "+updated);
-			return getCategory(updatePositionBeanObject.getCategoryToUpdate().getParentId(), header, response);
+			return getCategory(updatePositionBeanObject.getCategoryToUpdate().getParentId());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,9 +74,7 @@ public class CategoriesResource {
 	}
 	
 	@PUT
-	public Response updateCategory(Category category, @Context HttpHeaders header, @Context HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		response.setHeader("Access-Control-Allow-Credentials","true"); 
+	public Response updateCategory(Category category) {
 		Response retResponse;
 		int status = 200;
 		boolean retValue = true;
@@ -109,9 +95,7 @@ public class CategoriesResource {
 	
 	@DELETE
 	@Path("{id}")
-	public Response deleteCategory(@PathParam("id") int id, @Context HttpHeaders header, @Context HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		response.setHeader("Access-Control-Allow-Credentials","true"); 
+	public Response deleteCategory(@PathParam("id") int id) {
 		Response retResponse;
 		int status = 200;
 		boolean retValue= true;
@@ -140,10 +124,7 @@ public class CategoriesResource {
 	@GET
 	@Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-	public Response getCategory(@PathParam("id") int id, @Context HttpHeaders header, @Context HttpServletResponse response) {
-		System.out.println("checking 1 2m");
-		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		response.setHeader("Access-Control-Allow-Credentials","true"); 
+	public Response getCategory(@PathParam("id") int id) {
 		int status = 200;
 		Category category = null;
 		List<Category> categoryList;
@@ -165,13 +146,25 @@ public class CategoriesResource {
 		return retResponse;
 	}
 	
+	@POST
+	@Path("reset")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public boolean resetCategory() {
+		boolean returnValue = false;
+		try {
+			returnValue = DAOHandler.getInstance().resetAndReload();
+		} catch (Exception e) {
+			e.printStackTrace();
+			returnValue = false;
+		}
+		return returnValue;
+	}
+	
 	//VTRAO: UNUSED API: TESTING PURPOSES
 	@GET
     @Path("all")
     @Produces(MediaType.APPLICATION_JSON)
-	public Response getAllCategories(@Context HttpHeaders header, @Context HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*"); 
-		response.setHeader("Access-Control-Allow-Credentials","true"); 
+	public Response getAllCategories() {
 		List<Category> categoryList = null;
 		int status = 200;
 		try {
@@ -188,20 +181,6 @@ public class CategoriesResource {
                 /*header("Access-Control-Allow-Origin", "*").
                 header("Access-Control-Allow-Credentials","true").*/ build();
 		return retResponse;
-	}
-
-	@POST
-	@Path("reload")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public boolean resetCategory() {
-		boolean returnValue = false;
-		try {
-			returnValue = DAOHandler.getInstance().resetAndReload();
-		} catch (Exception e) {
-			e.printStackTrace();
-			returnValue = false;
-		}
-		return returnValue;
 	}
 	
 	@GET

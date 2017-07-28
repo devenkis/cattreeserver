@@ -6,7 +6,7 @@
 				(
 				id   integer primary key autoincrement,
                 name text not null,
-                displayname text,
+                catname text not null,
                 description text,
                 parentid integer,
                 siblingnumber real,
@@ -18,7 +18,7 @@
 				(
 				id   integer primary key autoincrement,
                 name text not null,
-                displayname text,
+                catname text,
                 description text,
                 parentid integer,
                 FOREIGN KEY (parentid) REFERENCES categories(id) ON DELETE CASCADE

@@ -15,6 +15,7 @@ public interface TreeDAO {
 	public int updatePosition(UpdatePositionBean updatePositionBeanObject ) throws Exception;
 	public int updateNode(Category category) throws Exception;
 	public int deleteNode(final int id) throws Exception;
+	public int deleteAllChildren(final int id) throws Exception;
 	public void close() throws Exception;
 	public void commit() throws Exception;
 }

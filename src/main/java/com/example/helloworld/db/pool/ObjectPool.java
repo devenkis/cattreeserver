@@ -1,6 +1,5 @@
 package com.example.helloworld.db.pool;
 
-import java.sql.Connection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import com.example.helloworld.db.sql.GenericJDBCInvoker;

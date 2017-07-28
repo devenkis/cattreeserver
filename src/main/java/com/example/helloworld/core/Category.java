@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Category {
 	private String name;
-	private String displayName;
+	private String catName;
 	private String description;
 	private int id;
 	private int parentId;
@@ -37,12 +37,12 @@ public class Category {
 	}
 	
 	public Category(String name, String description) {
-		this.name = this.displayName = name;
+		this.name = this.catName = name;
 		this.description = description;
 	}
-	public Category(final int id, final String name, final String displayName, final String description, final int parentId, final float siblingNumber) {
+	public Category(final int id, final String name, final String catName, final String description, final int parentId, final float siblingNumber) {
 		this.name = name;
-		this.displayName = displayName;
+		this.catName = catName;
 		this.description = description;
 		this.parentId = parentId;
 		this.id = id;
@@ -54,11 +54,11 @@ public class Category {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getDisplayName() {
-		return displayName;
+	public String getCatName() {
+		return catName;
 	}
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setCatName(String catName) {
+		this.catName = catName;
 	}
 	public String getDescription() {
 		return description;
