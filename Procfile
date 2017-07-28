@@ -1,1 +1,1 @@
-web    java $JAVA_OPTS -Ddw.http.port=$UPORT -Ddw.http.adminPort=$APORT -jar path/to/dw/module/target/example-develop-SNAPSHOT.jar server path/to/dw/module/config-heroku.yml
+web    java $JAVA_OPTS -Ddw.http.port=8090 -Ddw.http.adminPort=8091 -jar target/dropwizard-example-1.2.0-SNAPSHOT-sources.jar server example.yml
